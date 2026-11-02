@@ -15,17 +15,13 @@ class SucoNovo(BaseModel):
     tem_gosto_de: str
 
 
-class SucoAtualizado(BaseModel):
-    frutas: list[str]
-
-
 def buscar_fruta(nome):
     resposta = requests.get(f"{URL}/{nome.lower()}")
 
     if resposta.status_code == 404:
         raise HTTPException(
             status_code=404,
-            detail=f"Fruta '{nome}' não encontrada. Use o nome em inglês, ex: banana, apple.",
+            detail=f"Fruta '{nome}' não encontrada.",
         )
 
     dados = resposta.json()
@@ -73,16 +69,3 @@ def cadastrar_suco(dados: SucoNovo):
 @app.get("/sucos")
 def listar_sucos():
     return sucos
-
-
-@app.put("/sucos/{id}")
-def atualizar_suco(id: int, dados: SucoAtualizado):
-    for suco in sucos:
-        if suco["id"] == id:
-            calorias, acucar = calcular_totais(dados.frutas)
-            suco["frutas"] = dados.frutas
-            suco["total_calorias"] = calorias
-            suco["total_acucar"] = acucar
-            return suco
-
-    raise HTTPException(status_code=404, detail=f"Suco {id} não encontrado.")
